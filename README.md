@@ -1,5 +1,5 @@
 # Compliant Tokenized Securities AMM (Solana)
-
+![Test SEC Compliance Engine](https://github.com/tmfmr29/solana-sec-compliant-swap/actions/workflows/test-compliance.yml/badge.svg)
 An on-chain Automated Market Maker (AMM) pool designed to swap Circle USDC for Tokenized Securities (such as Tokenized NMS Stocks) in accordance with the SEC's 5-Year Innovation Exemption for Tokenized Securities Venues (TSVs).
 
 ## Regulatory Architecture & Safeguards

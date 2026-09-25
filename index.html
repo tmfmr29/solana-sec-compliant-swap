@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEC-Compliant TSV Swap | Solana</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        solana: {
+                            purple: '#9945FF',
+                            green: '#14F195'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-200 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-solana-green to-solana-purple">
+                TSV Exemption Swap
+            </h1>
+            <button id="connectBtn" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full transition border border-slate-700" onclick="connectWallet()">
+                Connect Wallet
+            </button>
+        </div>
+
+        <!-- Compliance Status -->
+        <div class="bg-slate-950 rounded-xl p-4 mb-6 border border-slate-800 space-y-2">
+            <h2 class="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-3">Live Compliance Hook Status</h2>
+            <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-400">OFAC Sanctions Screen</span>
+                <span id="ofacStatus" class="text-slate-600 font-mono text-xs">Waiting...</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-400">U.S. Person Verified</span>
+                <span id="usStatus" class="text-slate-600 font-mono text-xs">Waiting...</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-400">NASDAQ Market Status (NVDA)</span>
+                <span class="text-emerald-400 font-mono text-xs flex items-center">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span> ACTIVE
+                </span>
+            </div>
+        </div>
+
+        <!-- Swap Interface -->
+        <div class="space-y-4 mb-6">
+            <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 focus-within:border-solana-purple transition">
+                <div class="flex justify-between text-sm mb-2 text-slate-400">
+                    <span>You pay</span>
+                    <span>Balance: <span id="usdcBalance">0.00</span></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <input type="number" id="usdcInput" placeholder="0" class="bg-transparent text-3xl w-2/3 outline-none text-white placeholder-slate-600" disabled>
+                    <div class="flex items-center space-x-2 bg-slate-700 px-3 py-1.5 rounded-lg">
+                        <span class="font-bold text-blue-400">USDC</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center -my-6 relative z-10">
+                <div class="bg-slate-900 border border-slate-800 p-2 rounded-full">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                <div class="flex justify-between text-sm mb-2 text-slate-400">
+                    <span>You receive (Estimated)</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <input type="text" id="nvdaOutput" placeholder="0" class="bg-transparent text-3xl w-2/3 outline-none text-white placeholder-slate-600 pointer-events-none" readonly>
+                    <div class="flex items-center space-x-2 bg-slate-700 px-3 py-1.5 rounded-lg">
+                        <span class="font-bold text-solana-green">tNVDA</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button id="swapBtn" class="w-full py-4 rounded-xl font-bold text-slate-900 bg-slate-600 cursor-not-allowed transition" disabled onclick="executeSwap()">
+            Connect Wallet to Swap
+        </button>
+
+        <p id="logOutput" class="text-xs text-center mt-4 text-slate-500 font-mono hidden"></p>
+    </div>
+
+    <script>
+        let isConnected = false;
+
+        function connectWallet() {
+            const btn = document.getElementById('connectBtn');
+            const swapBtn = document.getElementById('swapBtn');
+            const usdcInput = document.getElementById('usdcInput');
+            
+            btn.innerText = '7XwPz9R2...Alice';
+            btn.classList.replace('bg-slate-800', 'bg-solana-purple/20');
+            btn.classList.add('text-solana-purple', 'border-solana-purple/50');
+            
+            document.getElementById('usdcBalance').innerText = '5,000.00';
+            
+            // Simulate Compliance Hook Verifications
+            setTimeout(() => {
+                document.getElementById('ofacStatus').innerText = 'CLEARED';
+                document.getElementById('ofacStatus').classList.replace('text-slate-600', 'text-emerald-400');
+            }, 500);
+
+            setTimeout(() => {
+                document.getElementById('usStatus').innerText = 'VERIFIED';
+                document.getElementById('usStatus').classList.replace('text-slate-600', 'text-emerald-400');
+                
+                // Enable Interface
+                usdcInput.disabled = false;
+                swapBtn.disabled = false;
+                swapBtn.classList.replace('bg-slate-600', 'bg-gradient-to-r');
+                swapBtn.classList.add('from-solana-green', 'to-solana-purple', 'text-white', 'cursor-pointer', 'hover:opacity-90');
+                swapBtn.innerText = 'Execute Compliant Swap';
+                isConnected = true;
+            }, 1000);
+        }
+
+        document.getElementById('usdcInput').addEventListener('input', function(e) {
+            const val = parseFloat(e.target.value);
+            const output = document.getElementById('nvdaOutput');
+            if (val > 0) {
+                // Mock Constant Product Math based on our Python script
+                output.value = (val * 0.0079).toFixed(4); 
+            } else {
+                output.value = '';
+            }
+        });
+
+        function executeSwap() {
+            const log = document.getElementById('logOutput');
+            const swapBtn = document.getElementById('swapBtn');
+            
+            if (document.getElementById('usdcInput').value === '') return;
+
+            swapBtn.innerHTML = '<span class="animate-pulse">Executing on Solana...</span>';
+            
+            setTimeout(() => {
+                swapBtn.innerHTML = 'Swap Successful';
+                swapBtn.classList.replace('from-solana-green', 'from-emerald-500');
+                swapBtn.classList.replace('to-solana-purple', 'to-emerald-600');
+                
+                log.classList.remove('hidden');
+                log.innerHTML = `Transaction Signature: <span class="text-solana-green">3ab9...f2a1</span><br>Transfer Hook Compliance: PASSED`;
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
